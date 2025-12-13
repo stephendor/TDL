@@ -1,0 +1,6 @@
+
+
+#Ignore insiders AI rules
+.github\instructions\codacy.instructions.md
+# Dependencies
+node_modules/
