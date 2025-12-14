@@ -633,14 +633,20 @@ def compute_persistence_image(
             sigma = 0.1  # Fallback value
 
     # Prepare weight function for giotto-tda
-    # giotto-tda's PersistenceImage calls weight_function with persistence values (1D array)
-    # not with full birth-death pairs
+    # giotto-tda's PersistenceImage calls weight_function with persistence
+    # values (1D array), not with full birth-death pairs
+    def _linear_weight(x):
+        """Linear weighting: w(persistence) = persistence."""
+        return x  # x is already persistence = death - birth
+
+    def _persistence_weight(x):
+        """Persistence-power weighting: w(persistence) = persistence^p."""
+        return x**weight_power
+
     if weight_function == "linear":
-        # Linear weighting: w(persistence) = persistence
-        weight_fn = lambda x: x  # x is already persistence = death - birth
+        weight_fn = _linear_weight
     elif weight_function == "persistence":
-        # Persistence-power weighting: w(persistence) = persistence^p
-        weight_fn = lambda x: x**weight_power
+        weight_fn = _persistence_weight
     else:
         # No weighting
         weight_fn = None
@@ -838,7 +844,9 @@ def persistence_amplitude(
         topological features.
 
     Examples:
-        >>> amplitude = persistence_amplitude(diagram, dimension=1, metric='wasserstein')
+        >>> amplitude = persistence_amplitude(
+        ...     diagram, dimension=1, metric='wasserstein'
+        ... )
         >>> print(f"H1 amplitude: {amplitude:.4f}")
         >>> # Empty diagram has zero amplitude
         >>> empty = np.array([]).reshape(0, 3)
@@ -1021,7 +1029,9 @@ def extract_entropy_betti_features(
             features[f"entropy_{dim_key}"] = entropy
 
             # Amplitude (Wasserstein distance)
-            amplitude = persistence_amplitude(dim_diagram, dimension=dim, metric="wasserstein")
+            amplitude = persistence_amplitude(
+                dim_diagram, dimension=dim, metric="wasserstein"
+            )
             features[f"amplitude_{dim_key}"] = amplitude
 
             # Total persistence (p=1 and p=2)
@@ -1048,5 +1058,3 @@ def extract_entropy_betti_features(
             features[f"betti_area_{dim_key}"] = 0.0
 
     return features
-
-

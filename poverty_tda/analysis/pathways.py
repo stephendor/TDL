@@ -27,14 +27,14 @@ License: Open Government Licence v3.0
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 
 logger = logging.getLogger(__name__)
 
@@ -429,7 +429,11 @@ def identify_gateway_lsoas(
                 # Get LSOA metadata if available
                 lad_name = None
                 region_name = None
-                if lsoa_boundaries is not None and "lsoa_code" in lsoa_boundaries.columns:
+                has_lsoa_code = (
+                    lsoa_boundaries is not None
+                    and "lsoa_code" in lsoa_boundaries.columns
+                )
+                if has_lsoa_code:
                     lsoa_row = lsoa_boundaries[
                         lsoa_boundaries["lsoa_code"] == lsoa_code
                     ]
@@ -628,9 +632,7 @@ def gateway_summary_report(
             "population": gateway.population,
             "destination_basin": gateway.destination_basin_id,
             "barrier_id": (
-                gateway.barrier_crossed.barrier_id
-                if gateway.barrier_crossed
-                else None
+                gateway.barrier_crossed.barrier_id if gateway.barrier_crossed else None
             ),
         }
         rows.append(row)

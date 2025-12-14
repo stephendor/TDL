@@ -29,7 +29,6 @@ from __future__ import annotations
 
 import logging
 import subprocess
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -69,8 +68,7 @@ try:
 except ImportError:
     HAS_TTK = False
     logger.debug(
-        "TTK not available in current environment. "
-        f"Use TTK Python: {TTK_PYTHON_PATH}"
+        f"TTK not available in current environment. Use TTK Python: {TTK_PYTHON_PATH}"
     )
 
 
@@ -261,8 +259,7 @@ def load_vtk_data(
 
     if suffix not in supported_formats:
         raise ValueError(
-            f"Unsupported VTK format: {suffix}. "
-            f"Supported formats: {supported_formats}"
+            f"Unsupported VTK format: {suffix}. Supported formats: {supported_formats}"
         )
 
     logger.info(f"Loading VTK file: {vtk_path}")
@@ -287,8 +284,7 @@ def load_vtk_data(
 
     else:
         raise ImportError(
-            "Neither pyvista nor vtk is available. "
-            "Install with: pip install pyvista"
+            "Neither pyvista nor vtk is available. Install with: pip install pyvista"
         )
 
 
@@ -338,8 +334,7 @@ def validate_scalar_field(
         if scalar_name not in vtk_data.point_data:
             available = list(vtk_data.point_data.keys())
             raise ValueError(
-                f"Scalar field '{scalar_name}' not found. "
-                f"Available fields: {available}"
+                f"Scalar field '{scalar_name}' not found. Available fields: {available}"
             )
 
         values = vtk_data.point_data[scalar_name]
@@ -361,8 +356,7 @@ def validate_scalar_field(
                 for i in range(point_data.GetNumberOfArrays())
             ]
             raise ValueError(
-                f"Scalar field '{scalar_name}' not found. "
-                f"Available fields: {available}"
+                f"Scalar field '{scalar_name}' not found. Available fields: {available}"
             )
 
         values = vtk_to_numpy(array)
@@ -458,11 +452,15 @@ def check_ttk_environment() -> bool:
         return False
 
     try:
+        ttk_test_cmd = (
+            "from topologytoolkit.ttkMorseSmaleComplex "
+            "import ttkMorseSmaleComplex; print('ok')"
+        )
         result = subprocess.run(
             [
                 str(TTK_PYTHON_PATH),
                 "-c",
-                "from topologytoolkit.ttkMorseSmaleComplex import ttkMorseSmaleComplex; print('ok')",
+                ttk_test_cmd,
             ],
             capture_output=True,
             text=True,
@@ -560,7 +558,10 @@ def compute_morse_smale_ttk(
     point_data = vtk_data.GetPointData()
     scalar_array = point_data.GetArray(scalar_name)
     if scalar_array is None:
-        available = [point_data.GetArrayName(i) for i in range(point_data.GetNumberOfArrays())]
+        available = [
+            point_data.GetArrayName(i)
+            for i in range(point_data.GetNumberOfArrays())
+        ]
         raise ValueError(f"Scalar '{scalar_name}' not found. Available: {available}")
     
     scalars = vtk_to_numpy(scalar_array)
@@ -638,11 +639,16 @@ def compute_morse_smale_ttk(
             for i in range(separatrices_output.GetNumberOfCells()):
                 sep_id = int(sep_id_array.GetValue(i)) if sep_id_array else i
                 if sep_id not in sep_dict:
+                    sep_type = (
+                        int(sep_type_array.GetValue(i)) if sep_type_array else 0
+                    )
+                    src_id = int(source_array.GetValue(i)) if source_array else -1
+                    dst_id = int(dest_array.GetValue(i)) if dest_array else -1
                     sep_dict[sep_id] = {
                         "separatrix_id": sep_id,
-                        "separatrix_type": int(sep_type_array.GetValue(i)) if sep_type_array else 0,
-                        "source_id": int(source_array.GetValue(i)) if source_array else -1,
-                        "destination_id": int(dest_array.GetValue(i)) if dest_array else -1,
+                        "separatrix_type": sep_type,
+                        "source_id": src_id,
+                        "destination_id": dst_id,
                     }
             
             result["separatrices"] = list(sep_dict.values())
@@ -889,15 +895,14 @@ def _run_ttk_native(
             for i in range(separatrices_output.GetNumberOfCells()):
                 sep_id = int(sep_id_array.GetValue(i)) if sep_id_array else i
                 if sep_id not in sep_dict:
+                    sep_type = int(sep_type_array.GetValue(i)) if sep_type_array else 0
+                    src_id = int(source_array.GetValue(i)) if source_array else -1
+                    dst_id = int(dest_array.GetValue(i)) if dest_array else -1
                     sep_dict[sep_id] = {
                         "separatrix_id": sep_id,
-                        "separatrix_type": (
-                            int(sep_type_array.GetValue(i)) if sep_type_array else 0
-                        ),
-                        "source_id": int(source_array.GetValue(i)) if source_array else -1,
-                        "destination_id": (
-                            int(dest_array.GetValue(i)) if dest_array else -1
-                        ),
+                        "separatrix_type": sep_type,
+                        "source_id": src_id,
+                        "destination_id": dst_id,
                     }
 
             result["separatrices"] = list(sep_dict.values())
@@ -1139,11 +1144,6 @@ def compute_persistence_pairs(
     """
     pairs: list[PersistencePair] = []
 
-    # Build lookup of critical points by ID
-    cp_by_id: dict[int, CriticalPoint] = {
-        cp.point_id: cp for cp in result.critical_points
-    }
-
     # Use separatrices to identify connected pairs
     # Each separatrix connects a saddle to an extremum
     saddle_connections: dict[int, list[int]] = {}
@@ -1266,7 +1266,8 @@ def simplify_topology(
 
         >>> # With persistence pairs
         >>> simplified, pairs = simplify_topology(result, 0.05, return_pairs=True)
-        >>> print(f"Removed {len([p for p in pairs if p.relative_persistence < 0.05])} pairs")
+        >>> low_pers = [p for p in pairs if p.relative_persistence < 0.05]
+        >>> print(f"Removed {len(low_pers)} pairs")
     """
     if not 0.0 <= persistence_threshold <= 1.0:
         raise ValueError(
@@ -1308,9 +1309,7 @@ def simplify_topology(
         f"Simplifying topology: threshold={persistence_threshold:.2%} "
         f"(abs={abs_threshold:.4f})"
     )
-    logger.info(
-        f"Removing {len(removed_pairs)} pairs, keeping {len(kept_pairs)} pairs"
-    )
+    logger.info(f"Removing {len(removed_pairs)} pairs, keeping {len(kept_pairs)} pairs")
 
     if removed_pairs:
         removed_by_type = {}
@@ -1331,16 +1330,7 @@ def simplify_topology(
         if cp.point_id not in all_paired_points:
             essential_points.add(cp.point_id)
 
-    # Filter critical points - keep those that are essential
-    # and those in points_to_remove that are also in essential_points
-    filtered_cps = [
-        cp
-        for cp in result.critical_points
-        if cp.point_id in essential_points or cp.point_id not in points_to_remove
-    ]
-
-    # Also filter by checking if the critical point's persistence is above threshold
-    # Use a simpler approach: keep points that aren't paired with low-persistence
+    # Filter critical points - keep points that aren't paired with low-persistence
     simplified_cps = [
         cp for cp in result.critical_points if cp.point_id not in points_to_remove
     ]

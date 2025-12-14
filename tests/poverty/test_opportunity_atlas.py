@@ -55,7 +55,11 @@ def sample_imd_df() -> pd.DataFrame:
                 "Tendring 016A",  # Jaywick
             ],
             "lad_code": [
-                "E09000001", "E09000001", "E09000001", "E09000001", "E07000076"
+                "E09000001",
+                "E09000001",
+                "E09000001",
+                "E09000001",
+                "E07000076",
             ],
             "lad_name": [
                 "City of London",
@@ -131,9 +135,7 @@ def temp_imd_csv(tmp_path: Path, sample_imd_df: pd.DataFrame) -> Path:
 class TestLoadImdData:
     """Unit tests for load_imd_data()."""
 
-    def test_load_from_filepath(
-        self, temp_imd_csv: Path, sample_imd_df: pd.DataFrame
-    ):
+    def test_load_from_filepath(self, temp_imd_csv: Path, sample_imd_df: pd.DataFrame):
         """Test loading from explicit filepath."""
         df = load_imd_data(filepath=temp_imd_csv, standardize_columns=False)
 
@@ -430,9 +432,7 @@ class TestImdDataIntegration:
 
         for domain in required_domains:
             score_col = f"{domain}_score"
-            assert score_col in downloaded_imd_df.columns, (
-                f"Missing domain: {domain}"
-            )
+            assert score_col in downloaded_imd_df.columns, f"Missing domain: {domain}"
 
     def test_domain_scores_valid_ranges(self, downloaded_imd_df: pd.DataFrame):
         """Verify domain scores are within expected ranges."""
@@ -445,9 +445,7 @@ class TestImdDataIntegration:
 
     def test_jaywick_is_most_deprived(self, downloaded_imd_df: pd.DataFrame):
         """Verify Jaywick (Tendring) is in decile 1 (most deprived)."""
-        jaywick = downloaded_imd_df[
-            downloaded_imd_df["lsoa_code"] == JAYWICK_LSOA_CODE
-        ]
+        jaywick = downloaded_imd_df[downloaded_imd_df["lsoa_code"] == JAYWICK_LSOA_CODE]
 
         assert len(jaywick) == 1, "Jaywick LSOA not found"
         assert jaywick["imd_decile"].iloc[0] == 1, (

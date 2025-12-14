@@ -63,20 +63,14 @@ def filter_by_lifetime(
     """
     # Validate inputs
     if diagram.ndim != 2 or diagram.shape[1] != 2:
-        raise ValueError(
-            f"Diagram must have shape (n, 2), got {diagram.shape}"
-        )
+        raise ValueError(f"Diagram must have shape (n, 2), got {diagram.shape}")
 
     if min_lifetime < 0:
-        raise ValueError(
-            f"min_lifetime must be non-negative, got {min_lifetime}"
-        )
+        raise ValueError(f"min_lifetime must be non-negative, got {min_lifetime}")
 
     # Check birth <= death for all features
     if np.any(diagram[:, 0] > diagram[:, 1]):
-        raise ValueError(
-            "Invalid diagram: some features have birth > death"
-        )
+        raise ValueError("Invalid diagram: some features have birth > death")
 
     # Compute lifetimes and filter
     lifetimes = diagram[:, 1] - diagram[:, 0]
@@ -109,9 +103,7 @@ def compute_lifetimes(diagram: PersistenceDiagram) -> NDArray[np.float64]:
         features that are less likely to be noise.
     """
     if diagram.ndim != 2 or diagram.shape[1] != 2:
-        raise ValueError(
-            f"Diagram must have shape (n, 2), got {diagram.shape}"
-        )
+        raise ValueError(f"Diagram must have shape (n, 2), got {diagram.shape}")
 
     return diagram[:, 1] - diagram[:, 0]
 
@@ -152,9 +144,7 @@ class PersistenceDiagramStats:
             ValueError: If diagram has invalid shape or is empty.
         """
         if diagram.ndim != 2 or diagram.shape[1] != 2:
-            raise ValueError(
-                f"Diagram must have shape (n, 2), got {diagram.shape}"
-            )
+            raise ValueError(f"Diagram must have shape (n, 2), got {diagram.shape}")
 
         if diagram.shape[0] == 0:
             raise ValueError("Cannot compute statistics for empty diagram")
@@ -182,12 +172,14 @@ if __name__ == "__main__":
 
     # Create a sample persistence diagram
     # Features: (birth, death) pairs
-    diagram = np.array([
-        [0.0, 1.0],   # Persistence: 1.0
-        [0.5, 0.6],   # Persistence: 0.1 (noise)
-        [1.0, 3.0],   # Persistence: 2.0 (significant)
-        [1.5, 1.8],   # Persistence: 0.3 (weak)
-    ])
+    diagram = np.array(
+        [
+            [0.0, 1.0],  # Persistence: 1.0
+            [0.5, 0.6],  # Persistence: 0.1 (noise)
+            [1.0, 3.0],  # Persistence: 2.0 (significant)
+            [1.5, 1.8],  # Persistence: 0.3 (weak)
+        ]
+    )
 
     print("Original persistence diagram:")
     print(diagram)

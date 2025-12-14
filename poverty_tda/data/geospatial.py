@@ -185,6 +185,7 @@ def aggregate_to_lad(
     logger.info(f"Aggregated to {len(lad_boundaries)} LADs")
     return lad_boundaries
 
+
 def get_lad_boundaries(
     lsoa_gdf: gpd.GeoDataFrame,
     lsoa_code_column: str = "LSOA21CD",

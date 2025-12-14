@@ -32,7 +32,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
 from poverty_tda.topology.morse_smale import CriticalPoint, MorseSmaleResult
@@ -84,9 +84,7 @@ class BasinProperties:
     @property
     def mean_barrier_height(self) -> float:
         """Mean barrier height."""
-        return (
-            float(np.mean(self.barrier_heights)) if self.barrier_heights else 0.0
-        )
+        return float(np.mean(self.barrier_heights)) if self.barrier_heights else 0.0
 
 
 @dataclass

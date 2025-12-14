@@ -15,4 +15,3 @@ __all__ = [
     "compute_window_distances",
     "detect_topology_changes",
 ]
-

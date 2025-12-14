@@ -47,7 +47,11 @@ def sample_lsoa_gdf() -> gpd.GeoDataFrame:
     gdf = gpd.GeoDataFrame(
         {
             "LSOA21CD": [
-                "E01000001", "E01000002", "E01000003", "E01000004", "W01000001"
+                "E01000001",
+                "E01000002",
+                "E01000003",
+                "E01000004",
+                "W01000001",
             ],
             "LSOA21NM": [
                 "City of London 001A",
@@ -311,9 +315,7 @@ class TestLsoaBoundariesIntegration:
         filepath = download_lsoa_boundaries(output_dir=tmp_dir)
         return load_lsoa_boundaries(filepath=filepath)
 
-    def test_lsoa_count_matches_expected(
-        self, downloaded_lsoa_gdf: gpd.GeoDataFrame
-    ):
+    def test_lsoa_count_matches_expected(self, downloaded_lsoa_gdf: gpd.GeoDataFrame):
         """Verify LSOA count matches expected ~33,755 for England and Wales."""
         # Allow 1% tolerance for any boundary changes
         tolerance = 0.01
@@ -352,9 +354,7 @@ class TestLsoaBoundariesIntegration:
         assert len(centroids) == 100
         assert all(centroids.geometry.geom_type == "Point")
 
-    def test_region_filter_england_wales(
-        self, downloaded_lsoa_gdf: gpd.GeoDataFrame
-    ):
+    def test_region_filter_england_wales(self, downloaded_lsoa_gdf: gpd.GeoDataFrame):
         """Verify England/Wales filtering produces expected split."""
         england = filter_by_region(downloaded_lsoa_gdf, "E01")
         wales = filter_by_region(downloaded_lsoa_gdf, "W01")

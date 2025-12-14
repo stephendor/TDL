@@ -47,9 +47,7 @@ _ENGLAND_IMD_2019_SCORES_URL = (
 
 # Welsh IMD 2019 (StatsWales Open Data)
 # Note: Welsh IMD uses different methodology and is not directly comparable
-_WALES_IMD_2019_URL = (
-    "https://statswales.gov.wales/Download/File?fileId=719"
-)
+_WALES_IMD_2019_URL = "https://statswales.gov.wales/Download/File?fileId=719"
 
 # Expected counts for validation
 EXPECTED_ENGLAND_LSOA_COUNT = 32844  # England only
@@ -455,9 +453,7 @@ def merge_with_boundaries(
     )
 
     match_rate = len(merged) / len(imd_df) * 100
-    logger.info(
-        f"Merged {len(merged)} records ({match_rate:.1f}% match rate)"
-    )
+    logger.info(f"Merged {len(merged)} records ({match_rate:.1f}% match rate)")
 
     if match_rate < 90:
         logger.warning(

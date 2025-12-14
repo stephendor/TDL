@@ -603,9 +603,7 @@ class TestTopologicalSimplification:
         main_max = max(simplified.get_maxima(), key=lambda m: m.value)
         assert main_max.value > 0.8
 
-    def test_simplify_with_return_pairs(
-        self, gaussian_vtk_path: Path
-    ) -> None:
+    def test_simplify_with_return_pairs(self, gaussian_vtk_path: Path) -> None:
         """Test simplification with return_pairs option."""
         result = compute_morse_smale(
             gaussian_vtk_path,
@@ -650,9 +648,7 @@ class TestTopologicalSimplification:
 
         assert simplified.persistence_threshold == 0.10
 
-    def test_simplify_invalid_threshold_raises(
-        self, gaussian_vtk_path: Path
-    ) -> None:
+    def test_simplify_invalid_threshold_raises(self, gaussian_vtk_path: Path) -> None:
         """Test that invalid threshold raises ValueError."""
         result = compute_morse_smale(
             gaussian_vtk_path,
@@ -716,9 +712,7 @@ class TestPersistenceAnalysis:
         assert diagram.ndim == 2
         assert diagram.shape[1] == 2  # [birth, death]
 
-    def test_persistence_diagram_valid_values(
-        self, gaussian_vtk_path: Path
-    ) -> None:
+    def test_persistence_diagram_valid_values(self, gaussian_vtk_path: Path) -> None:
         """Test that diagram has valid birth <= death values."""
         result = compute_morse_smale(
             gaussian_vtk_path,
@@ -758,9 +752,7 @@ class TestPersistenceAnalysis:
 
         assert 0.0 <= threshold <= 1.0
 
-    def test_suggest_threshold_quantile_method(
-        self, gaussian_vtk_path: Path
-    ) -> None:
+    def test_suggest_threshold_quantile_method(self, gaussian_vtk_path: Path) -> None:
         """Test threshold suggestion with quantile method."""
         result = compute_morse_smale(
             gaussian_vtk_path,
@@ -772,9 +764,7 @@ class TestPersistenceAnalysis:
 
         assert 0.0 <= threshold <= 1.0
 
-    def test_suggest_threshold_target_features(
-        self, gaussian_vtk_path: Path
-    ) -> None:
+    def test_suggest_threshold_target_features(self, gaussian_vtk_path: Path) -> None:
         """Test threshold suggestion with target feature count."""
         result = compute_morse_smale(
             gaussian_vtk_path,
@@ -786,9 +776,7 @@ class TestPersistenceAnalysis:
         n_pairs = len(pairs)
 
         if n_pairs > 2:
-            threshold = suggest_persistence_threshold(
-                result, target_features=2
-            )
+            threshold = suggest_persistence_threshold(result, target_features=2)
             assert threshold > 0.0
 
     def test_suggest_threshold_invalid_method_raises(

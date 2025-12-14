@@ -9,14 +9,13 @@ Tests cover:
 - Validation of separatrix topology (connects saddle to extremum)
 """
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import pytest
 from shapely.geometry import LineString, Polygon
 
 from poverty_tda.analysis.barriers import (
-    BarrierImpact,
     BarrierProperties,
     analyze_barrier_impact,
     barrier_summary_report,
@@ -32,7 +31,6 @@ from poverty_tda.topology.morse_smale import (
     MorseSmaleResult,
     Separatrix,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -80,11 +78,13 @@ def simple_morse_smale_with_separatrices():
 
     # Create separatrices
     # Descending: saddle → minimum
-    desc_points = np.array([
-        [0.0, 0.0, 0.0],   # Start at saddle
-        [-0.5, 0.0, 0.0],  # Along x-axis
-        [-1.0, 0.0, 0.0],  # End at minimum
-    ])
+    desc_points = np.array(
+        [
+            [0.0, 0.0, 0.0],  # Start at saddle
+            [-0.5, 0.0, 0.0],  # Along x-axis
+            [-1.0, 0.0, 0.0],  # End at minimum
+        ]
+    )
     desc_values = np.array([0.0, -0.25, -1.0])
 
     desc_sep = Separatrix(
@@ -97,11 +97,13 @@ def simple_morse_smale_with_separatrices():
     )
 
     # Ascending: saddle → maximum
-    asc_points = np.array([
-        [0.0, 0.0, 0.0],  # Start at saddle
-        [0.5, 0.0, 0.0],  # Along x-axis
-        [1.0, 0.0, 0.0],  # End at maximum
-    ])
+    asc_points = np.array(
+        [
+            [0.0, 0.0, 0.0],  # Start at saddle
+            [0.5, 0.0, 0.0],  # Along x-axis
+            [1.0, 0.0, 0.0],  # End at maximum
+        ]
+    )
     asc_values = np.array([0.0, 0.25, 1.0])
 
     asc_sep = Separatrix(
@@ -235,8 +237,9 @@ def test_compute_barrier_strength_basic(simple_morse_smale_with_separatrices):
     assert strength["barrier_height"] >= 0.0
 
     # Check barrier width
-    # Path length from (0,0) → (-0.5,0) → (-1,0) = 0.5 + 0.5 = 1.0 km
-    assert strength["barrier_width_km"] == pytest.approx(0.001, abs=0.0001)  # 1m = 0.001km
+    # Path length from (0,0) → (-0.5,0) → (-1,0) = 1.0 km
+    # 1m = 0.001km
+    assert strength["barrier_width_km"] == pytest.approx(0.001, abs=0.0001)
 
 
 def test_compute_barrier_strength_without_path():
@@ -348,7 +351,12 @@ def test_map_barriers_handles_missing_geometry():
     )
 
     lsoa_gdf = gpd.GeoDataFrame(
-        [{"lsoa_code": "E01000001", "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])}],
+        [
+            {
+                "lsoa_code": "E01000001",
+                "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            }
+        ],
         crs="EPSG:27700",
     )
 
@@ -367,13 +375,28 @@ def test_rank_barriers_by_persistence():
     """Test barrier ranking by persistence."""
     # Create barriers with different persistence values
     saddle1 = CriticalPoint(
-        point_id=0, position=(0, 0, 0), value=0, point_type=1, manifold_dim=2, persistence=0.9
+        point_id=0,
+        position=(0, 0, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=0.9,
     )
     saddle2 = CriticalPoint(
-        point_id=1, position=(1, 1, 0), value=0, point_type=1, manifold_dim=2, persistence=0.5
+        point_id=1,
+        position=(1, 1, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=0.5,
     )
     saddle3 = CriticalPoint(
-        point_id=2, position=(2, 2, 0), value=0, point_type=1, manifold_dim=2, persistence=0.7
+        point_id=2,
+        position=(2, 2, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=0.7,
     )
 
     min_cp = CriticalPoint(
@@ -580,7 +603,12 @@ def test_compute_barrier_impacts():
 def test_barrier_summary_report():
     """Test barrier summary report generation."""
     saddle = CriticalPoint(
-        point_id=0, position=(0, 0, 0), value=0, point_type=1, manifold_dim=2, persistence=0.8
+        point_id=0,
+        position=(0, 0, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=0.8,
     )
     min_cp = CriticalPoint(
         point_id=1, position=(1, 1, 0), value=-1, point_type=0, manifold_dim=2
@@ -675,10 +703,20 @@ def test_barrier_properties_type_checks():
 def test_barrier_strength_score():
     """Test barrier strength score computation."""
     saddle1 = CriticalPoint(
-        point_id=0, position=(0, 0, 0), value=0, point_type=1, manifold_dim=2, persistence=0.8
+        point_id=0,
+        position=(0, 0, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=0.8,
     )
     saddle2 = CriticalPoint(
-        point_id=1, position=(0, 0, 0), value=0, point_type=1, manifold_dim=2, persistence=None
+        point_id=1,
+        position=(0, 0, 0),
+        value=0,
+        point_type=1,
+        manifold_dim=2,
+        persistence=None,
     )
 
     min_cp = CriticalPoint(

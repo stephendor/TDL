@@ -94,9 +94,7 @@ def merge_diagrams(diagrams: list[PersistenceDiagram]) -> PersistenceDiagram:
     raise NotImplementedError("merge_diagrams will be implemented in later phases")
 
 
-def filter_by_dimension(
-    diagram: PersistenceDiagram, dim: int
-) -> PersistenceDiagram:
+def filter_by_dimension(diagram: PersistenceDiagram, dim: int) -> PersistenceDiagram:
     """Extract features of a specific homological dimension.
 
     Filters a persistence diagram to retain only features from the specified
@@ -126,9 +124,7 @@ def filter_by_dimension(
         This function requires dimension information in the third column.
         For diagrams without dimension info, use other filtering methods.
     """
-    raise NotImplementedError(
-        "filter_by_dimension will be implemented in later phases"
-    )
+    raise NotImplementedError("filter_by_dimension will be implemented in later phases")
 
 
 def compute_lifetimes(diagram: PersistenceDiagram) -> NDArray[np.float64]:

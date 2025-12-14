@@ -9,27 +9,26 @@ Tests cover:
 - Validation against known poverty trap areas
 """
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import pytest
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Polygon
 
 from poverty_tda.analysis.trap_identification import (
     BasinProperties,
     TrapScore,
-    extract_basin_properties,
     compute_trap_score,
     estimate_basin_population,
+    extract_basin_properties,
     rank_poverty_traps,
     trap_summary_report,
 )
 from poverty_tda.topology.morse_smale import (
     CriticalPoint,
-    Separatrix,
     MorseSmaleResult,
+    Separatrix,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -327,7 +326,8 @@ def test_compute_trap_score_ranking_logic():
     score2 = next(s for s in scores if s.basin_id == 2)
 
     assert score1.total_score > score2.total_score
-    assert score1.mobility_score > score2.mobility_score  # Lower mobility = higher score
+    # Lower mobility = higher score
+    assert score1.mobility_score > score2.mobility_score
     assert score1.size_score > score2.size_score  # Larger area = higher score
     assert score1.barrier_score > score2.barrier_score  # Higher barrier = higher score
 
@@ -427,7 +427,12 @@ def test_estimate_basin_population_handles_missing_data():
     """Test that population estimation handles missing data gracefully."""
     # Create LSOA data without population column
     gdf_no_pop = gpd.GeoDataFrame(
-        [{"lsoa_code": "E01000001", "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])}],
+        [
+            {
+                "lsoa_code": "E01000001",
+                "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            }
+        ],
         crs="EPSG:27700",
     )
 
@@ -452,7 +457,13 @@ def test_estimate_basin_population_handles_missing_data():
 def test_estimate_basin_population_empty_basin():
     """Test population estimation for empty basin."""
     lsoa_gdf = gpd.GeoDataFrame(
-        [{"lsoa_code": "E01000001", "population": 1000, "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])}],
+        [
+            {
+                "lsoa_code": "E01000001",
+                "population": 1000,
+                "geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            }
+        ],
         crs="EPSG:27700",
     )
 

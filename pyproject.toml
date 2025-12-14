@@ -43,10 +43,15 @@ include = ["financial_tda*", "poverty_tda*", "shared*"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+exclude = ["docs/notebooks/*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Notebooks have relaxed linting for line length and import ordering
+"*.ipynb" = ["E501", "E402", "I001", "F401", "F841"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["financial_tda", "poverty_tda", "shared"]

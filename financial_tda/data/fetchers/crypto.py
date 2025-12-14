@@ -104,9 +104,7 @@ def fetch_ohlc(
                         f"Rate limit exceeded for {coin_id} "
                         f"after {max_retries} attempts"
                     )
-                    raise ValueError(
-                        f"Rate limit exceeded for {coin_id}"
-                    )
+                    raise ValueError(f"Rate limit exceeded for {coin_id}")
 
             response.raise_for_status()
             data = response.json()
@@ -126,9 +124,7 @@ def fetch_ohlc(
             df.set_index("timestamp", inplace=True)
             df.index.name = "Date"
 
-            logger.info(
-                f"Fetched {len(df)} OHLC observations for {coin_id}"
-            )
+            logger.info(f"Fetched {len(df)} OHLC observations for {coin_id}")
             return df
 
         except requests.exceptions.HTTPError as e:
@@ -138,31 +134,25 @@ def fetch_ohlc(
             elif attempt < max_retries - 1:
                 wait_time = BASE_RETRY_DELAY * (2**attempt)
                 logger.warning(
-                    f"HTTP error for {coin_id}: {e}. "
-                    f"Retrying in {wait_time} seconds"
+                    f"HTTP error for {coin_id}: {e}. Retrying in {wait_time} seconds"
                 )
                 time.sleep(wait_time)
             else:
-                logger.error(
-                    f"Failed to fetch {coin_id} after {max_retries} attempts"
-                )
+                logger.error(f"Failed to fetch {coin_id} after {max_retries} attempts")
                 raise
 
         except requests.exceptions.RequestException as e:
             if attempt < max_retries - 1:
                 wait_time = BASE_RETRY_DELAY * (2**attempt)
                 logger.warning(
-                    f"Network error for {coin_id}: {e}. "
-                    f"Retrying in {wait_time} seconds"
+                    f"Network error for {coin_id}: {e}. Retrying in {wait_time} seconds"
                 )
                 time.sleep(wait_time)
             else:
                 logger.error(
                     f"Network error for {coin_id} after {max_retries} attempts"
                 )
-                raise ValueError(
-                    f"Failed to fetch {coin_id}: {e}"
-                ) from e
+                raise ValueError(f"Failed to fetch {coin_id}: {e}") from e
 
     # Should not reach here
     return pd.DataFrame()
@@ -230,17 +220,13 @@ def fetch_market_chart(
                     time.sleep(wait_time)
                     continue
                 else:
-                    raise ValueError(
-                        f"Rate limit exceeded for {coin_id}"
-                    )
+                    raise ValueError(f"Rate limit exceeded for {coin_id}")
 
             response.raise_for_status()
             data = response.json()
 
             if not data or "prices" not in data:
-                logger.warning(
-                    f"No market chart data for {coin_id}"
-                )
+                logger.warning(f"No market chart data for {coin_id}")
                 return pd.DataFrame()
 
             # Parse market chart data
@@ -260,9 +246,7 @@ def fetch_market_chart(
             df.set_index("timestamp", inplace=True)
             df.index.name = "Date"
 
-            logger.info(
-                f"Fetched {len(df)} market chart observations for {coin_id}"
-            )
+            logger.info(f"Fetched {len(df)} market chart observations for {coin_id}")
             return df
 
         except requests.exceptions.HTTPError as e:
@@ -282,9 +266,7 @@ def fetch_market_chart(
                 wait_time = BASE_RETRY_DELAY * (2**attempt)
                 time.sleep(wait_time)
             else:
-                raise ValueError(
-                    f"Failed to fetch {coin_id}: {e}"
-                ) from e
+                raise ValueError(f"Failed to fetch {coin_id}: {e}") from e
 
     return pd.DataFrame()
 
@@ -332,16 +314,10 @@ def fetch_historical_range(
 
     # Convert dates to Unix timestamps
     try:
-        start_ts = int(
-            datetime.strptime(start_date, "%Y-%m-%d").timestamp()
-        )
-        end_ts = int(
-            datetime.strptime(end_date, "%Y-%m-%d").timestamp()
-        )
+        start_ts = int(datetime.strptime(start_date, "%Y-%m-%d").timestamp())
+        end_ts = int(datetime.strptime(end_date, "%Y-%m-%d").timestamp())
     except ValueError as e:
-        raise ValueError(
-            f"Invalid date format. Use YYYY-MM-DD: {e}"
-        ) from e
+        raise ValueError(f"Invalid date format. Use YYYY-MM-DD: {e}") from e
 
     url = f"{COINGECKO_BASE_URL}/coins/{coin_id}/market_chart/range"
     params = {
@@ -365,17 +341,13 @@ def fetch_historical_range(
                     time.sleep(wait_time)
                     continue
                 else:
-                    raise ValueError(
-                        f"Rate limit exceeded for {coin_id}"
-                    )
+                    raise ValueError(f"Rate limit exceeded for {coin_id}")
 
             response.raise_for_status()
             data = response.json()
 
             if not data or "prices" not in data:
-                logger.warning(
-                    f"No data for {coin_id} from {start_date} to {end_date}"
-                )
+                logger.warning(f"No data for {coin_id} from {start_date} to {end_date}")
                 return pd.DataFrame()
 
             # Parse data (same format as market_chart)
@@ -414,9 +386,7 @@ def fetch_historical_range(
                 wait_time = BASE_RETRY_DELAY * (2**attempt)
                 time.sleep(wait_time)
             else:
-                raise ValueError(
-                    f"Failed to fetch {coin_id}: {e}"
-                ) from e
+                raise ValueError(f"Failed to fetch {coin_id}: {e}") from e
 
     return pd.DataFrame()
 
@@ -481,7 +451,5 @@ def fetch_multiple_coins(
             logger.error(f"Failed to fetch {coin_id}: {e}")
             # Continue with remaining coins
 
-    logger.info(
-        f"Successfully fetched {len(results)}/{len(coin_ids)} coins"
-    )
+    logger.info(f"Successfully fetched {len(results)}/{len(coin_ids)} coins")
     return results

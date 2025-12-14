@@ -22,7 +22,6 @@ from numpy.typing import NDArray
 from financial_tda.topology.embedding import takens_embedding
 from financial_tda.topology.features import (
     extract_entropy_betti_features,
-    extract_image_features,
     extract_landscape_features,
 )
 from financial_tda.topology.filtration import compute_persistence_vr
@@ -55,13 +54,14 @@ def sliding_window_generator(
 
     Examples:
         >>> data = np.random.randn(100)
-        >>> for start, end, window in sliding_window_generator(data, window_size=20, stride=10):
+        >>> gen = sliding_window_generator(data, window_size=20, stride=10)
+        >>> for start, end, window in gen:
         ...     print(f"Window [{start}:{end}] has {len(window)} points")
 
     Notes:
         - If data length < window_size, yields single window with all data
         - Final window may be shorter than window_size if data doesn't divide evenly
-        - For financial data, typical window_size=40 days, stride=5 days (Gidea & Katz 2018)
+        - For financial data, typical window_size=40 days, stride=5 days
     """
     data = np.asarray(data)
 
@@ -139,9 +139,7 @@ def extract_windowed_features(
     time_series = np.asarray(time_series, dtype=np.float64)
 
     if time_series.ndim != 1:
-        raise ValueError(
-            f"time_series must be 1D array, got shape {time_series.shape}"
-        )
+        raise ValueError(f"time_series must be 1D array, got shape {time_series.shape}")
 
     results = []
 
@@ -158,9 +156,7 @@ def extract_windowed_features(
             # Takens embedding
             if embedding_dim is None or embedding_delay is None:
                 # Use default embedding parameters
-                embedded = takens_embedding(
-                    window_data, dimension=3, delay=1
-                )
+                embedded = takens_embedding(window_data, dimension=3, delay=1)
             else:
                 embedded = takens_embedding(
                     window_data, dimension=embedding_dim, delay=embedding_delay
@@ -190,22 +186,36 @@ def extract_windowed_features(
                 landscape_feats = extract_landscape_features(diagram)
                 features.update(landscape_feats)
             except Exception as e:
-                logger.warning("Landscape extraction failed for window [%d:%d]: %s", start_idx, end_idx, e)
+                logger.warning(
+                    "Landscape extraction failed for window [%d:%d]: %s",
+                    start_idx,
+                    end_idx,
+                    e,
+                )
                 # Add NaN landscape features
-                features.update({
-                    "L1": np.nan,
-                    "L2": np.nan,
-                    "mean": np.nan,
-                    "std": np.nan,
-                    "max": np.nan,
-                })
+                features.update(
+                    {
+                        "L1": np.nan,
+                        "L2": np.nan,
+                        "mean": np.nan,
+                        "std": np.nan,
+                        "max": np.nan,
+                    }
+                )
 
             # 2. Entropy/Betti features
             try:
-                entropy_feats = extract_entropy_betti_features(diagram, dimensions=homology_dimensions)
+                entropy_feats = extract_entropy_betti_features(
+                    diagram, dimensions=homology_dimensions
+                )
                 features.update(entropy_feats)
             except Exception as e:
-                logger.warning("Entropy/Betti extraction failed for window [%d:%d]: %s", start_idx, end_idx, e)
+                logger.warning(
+                    "Entropy/Betti extraction failed for window [%d:%d]: %s",
+                    start_idx,
+                    end_idx,
+                    e,
+                )
 
         except Exception as e:
             logger.warning(

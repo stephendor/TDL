@@ -28,9 +28,12 @@ from __future__ import annotations
 import logging
 import warnings
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import geopandas as gpd
+
+if TYPE_CHECKING:
+    from poverty_tda.topology.morse_smale import MorseSmaleResult
 import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import griddata
@@ -223,9 +226,7 @@ def interpolate_surface(
         )
 
     if grid_x.shape != grid_y.shape:
-        raise ValueError(
-            f"grid_x shape {grid_x.shape} != grid_y shape {grid_y.shape}"
-        )
+        raise ValueError(f"grid_x shape {grid_x.shape} != grid_y shape {grid_y.shape}")
 
     # Remove NaN values from input
     valid_mask = ~np.isnan(values)
@@ -390,11 +391,13 @@ def export_mobility_vtk(
     elif suffix == ".vts":
         # Create VTK StructuredGrid - explicit point coordinates
         z = np.zeros_like(grid_x)
-        points = np.column_stack([
-            grid_x.ravel(order="F"),
-            grid_y.ravel(order="F"),
-            z.ravel(order="F"),
-        ])
+        points = np.column_stack(
+            [
+                grid_x.ravel(order="F"),
+                grid_y.ravel(order="F"),
+                z.ravel(order="F"),
+            ]
+        )
 
         vtk_grid = pv.StructuredGrid()
         vtk_grid.points = points
@@ -402,9 +405,7 @@ def export_mobility_vtk(
         vtk_grid.point_data[scalar_name] = surface_values.flatten(order="F")
 
     else:
-        raise ValueError(
-            f"Unsupported VTK format: {suffix}. Use .vti or .vts"
-        )
+        raise ValueError(f"Unsupported VTK format: {suffix}. Use .vti or .vts")
 
     # Save file
     vtk_grid.save(str(output_path))
@@ -486,17 +487,23 @@ def interpolate_chunked(
             chunk_y = grid_y[y_start:y_end, x_start:x_end]
 
             # Get bounding box with buffer for points
-            buffer = chunk_size * 0.2 * max(
-                (grid_x.max() - grid_x.min()) / nx,
-                (grid_y.max() - grid_y.min()) / ny,
+            buffer = (
+                chunk_size
+                * 0.2
+                * max(
+                    (grid_x.max() - grid_x.min()) / nx,
+                    (grid_y.max() - grid_y.min()) / ny,
+                )
             )
             x_min, x_max = chunk_x.min() - buffer, chunk_x.max() + buffer
             y_min, y_max = chunk_y.min() - buffer, chunk_y.max() + buffer
 
             # Filter points to chunk region
             mask = (
-                (coords[:, 0] >= x_min) & (coords[:, 0] <= x_max) &
-                (coords[:, 1] >= y_min) & (coords[:, 1] <= y_max)
+                (coords[:, 0] >= x_min)
+                & (coords[:, 0] <= x_max)
+                & (coords[:, 1] >= y_min)
+                & (coords[:, 1] <= y_max)
             )
 
             if mask.sum() >= 4:  # Need at least 4 points for cubic
@@ -507,8 +514,7 @@ def interpolate_chunked(
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore")
                         chunk_surface = griddata(
-                            chunk_coords, chunk_vals,
-                            (chunk_x, chunk_y), method=method
+                            chunk_coords, chunk_vals, (chunk_x, chunk_y), method=method
                         )
                     surface[y_start:y_end, x_start:x_end] = chunk_surface
                 except Exception as e:
@@ -595,13 +601,10 @@ def build_mobility_surface(
     # Step 2: Interpolate
     if use_chunked:
         surface = interpolate_chunked(
-            centroids, values, grid_x, grid_y,
-            chunk_size=chunk_size, method=method
+            centroids, values, grid_x, grid_y, chunk_size=chunk_size, method=method
         )
     else:
-        surface = interpolate_surface(
-            centroids, values, grid_x, grid_y, method=method
-        )
+        surface = interpolate_surface(centroids, values, grid_x, grid_y, method=method)
 
     # Update metadata
     metadata["method"] = method
@@ -701,7 +704,6 @@ def analyze_mobility_topology(
         - simplify_topology: Post-hoc simplification of results
     """
     from poverty_tda.topology.morse_smale import (
-        MorseSmaleResult,
         check_ttk_environment,
         compute_morse_smale,
     )

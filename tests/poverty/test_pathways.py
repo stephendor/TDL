@@ -10,15 +10,13 @@ Tests cover:
 - Edge cases (LSOA at minimum, far from separatrix)
 """
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import pytest
 from shapely.geometry import LineString, Point, Polygon
 
 from poverty_tda.analysis.pathways import (
-    DEFAULT_MAX_STEPS,
-    CONVERGENCE_THRESHOLD,
     GatewayLSOA,
     IntegralLine,
     compute_gateway_impacts,
@@ -30,7 +28,6 @@ from poverty_tda.analysis.pathways import (
     score_gateway_impact,
     trace_integral_line,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -109,7 +106,8 @@ def mock_barriers():
         manifold_dim=2,
     )
 
-    sep = Separatrix(
+    # Separatrix defined for context but not used directly in test
+    _ = Separatrix(
         separatrix_id=0,
         source_id=0,
         destination_id=1,
@@ -252,12 +250,14 @@ def test_trace_integral_line_max_steps():
 
 def test_integral_line_path_length():
     """Test path length computation."""
-    path = np.array([
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [2.0, 1.0],
-    ])
+    path = np.array(
+        [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [2.0, 1.0],
+        ]
+    )
 
     line = IntegralLine(
         line_id=0,
@@ -333,14 +333,16 @@ def test_identify_gateway_lsoas_basic(mock_barriers):
     flow_line_crossing = IntegralLine(
         line_id=0,
         start_point=(2.0, 0.0),  # Start right of barrier
-        end_point=(-2.0, 0.0),   # End left of barrier
-        path=np.array([
-            [2.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 0.0],  # Crosses barrier here
-            [-1.0, 0.0],
-            [-2.0, 0.0],
-        ]),
+        end_point=(-2.0, 0.0),  # End left of barrier
+        path=np.array(
+            [
+                [2.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 0.0],  # Crosses barrier here
+                [-1.0, 0.0],
+                [-2.0, 0.0],
+            ]
+        ),
         destination_basin_id=1,
     )
 
@@ -348,10 +350,12 @@ def test_identify_gateway_lsoas_basic(mock_barriers):
         line_id=1,
         start_point=(2.0, 2.0),
         end_point=(1.0, 2.0),
-        path=np.array([
-            [2.0, 2.0],
-            [1.0, 2.0],
-        ]),
+        path=np.array(
+            [
+                [2.0, 2.0],
+                [1.0, 2.0],
+            ]
+        ),
         destination_basin_id=0,
     )
 
@@ -375,10 +379,12 @@ def test_identify_gateway_lsoas_no_crossings(mock_barriers):
         line_id=0,
         start_point=(2.0, 2.0),
         end_point=(1.0, 2.0),
-        path=np.array([
-            [2.0, 2.0],
-            [1.0, 2.0],
-        ]),
+        path=np.array(
+            [
+                [2.0, 2.0],
+                [1.0, 2.0],
+            ]
+        ),
     )
 
     flow_paths = {
@@ -397,11 +403,13 @@ def test_identify_gateway_lsoas_with_lsoa_data(mock_barriers):
         line_id=0,
         start_point=(2.0, 0.0),
         end_point=(-2.0, 0.0),
-        path=np.array([
-            [2.0, 0.0],
-            [0.0, 0.0],
-            [-2.0, 0.0],
-        ]),
+        path=np.array(
+            [
+                [2.0, 0.0],
+                [0.0, 0.0],
+                [-2.0, 0.0],
+            ]
+        ),
     )
 
     flow_paths = {
@@ -447,9 +455,7 @@ def test_score_gateway_impact_basic():
 
     gateway.barrier_crossed = MockBarrier()
 
-    basin_properties = {
-        0: {"trap_score": 0.9, "population": 10000}
-    }
+    basin_properties = {0: {"trap_score": 0.9, "population": 10000}}
 
     score = score_gateway_impact(gateway, basin_properties)
 

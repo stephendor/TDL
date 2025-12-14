@@ -302,9 +302,7 @@ class TestMapToLSOA:
         assert "Middlesbrough" in lad_names
         assert "Cambridge" in lad_names
 
-    def test_unmapped_points(
-        self, synthetic_lsoa_gdf: gpd.GeoDataFrame
-    ) -> None:
+    def test_unmapped_points(self, synthetic_lsoa_gdf: gpd.GeoDataFrame) -> None:
         """Test handling of points outside LSOA boundaries."""
         # Create point outside all boundaries
         outside_point = CriticalPoint(
@@ -504,9 +502,7 @@ class TestConvenienceFunctions:
         assert len(top_traps) == 2
         assert all(c.is_poverty_trap for c in top_traps)
 
-    def test_to_dataframe(
-        self, synthetic_morse_smale_result: MorseSmaleResult
-    ) -> None:
+    def test_to_dataframe(self, synthetic_morse_smale_result: MorseSmaleResult) -> None:
         """Test conversion to pandas DataFrame."""
         classifications = classify_critical_points(synthetic_morse_smale_result)
         df = to_dataframe(classifications)

@@ -108,9 +108,7 @@ def compute_deprivation_change(
         )
 
         # Positive change = rank increased = less deprived = improvement
-        change = (
-            merged[f"{rank_column}_current"] - merged[f"{rank_column}_baseline"]
-        )
+        change = merged[f"{rank_column}_current"] - merged[f"{rank_column}_baseline"]
 
         if normalize:
             max_change = max(abs(change.max()), abs(change.min()))
@@ -190,9 +188,7 @@ def compute_income_growth(
             f"IMD DataFrame must contain '{rank_column}' or '{score_column}'"
         )
 
-    return pd.Series(
-        income_indicator.values, index=imd_df.index, name="income_growth"
-    )
+    return pd.Series(income_indicator.values, index=imd_df.index, name="income_growth")
 
 
 def compute_mobility_proxy(
@@ -264,9 +260,7 @@ def compute_mobility_proxy(
     dep_change_normalized = (dep_change + 1) / 2
 
     # Compute weighted combination
-    mobility_proxy = (
-        alpha * dep_change_normalized + beta * edu_upward + gamma * income
-    )
+    mobility_proxy = alpha * dep_change_normalized + beta * edu_upward + gamma * income
 
     # Build result DataFrame
     result = pd.DataFrame(
@@ -352,9 +346,7 @@ def aggregate_to_lad(
                     result[col] = np.average(group[col], weights=weights)
             return pd.Series(result)
 
-        agg = mobility_df.groupby(lad_column).apply(
-            weighted_mean, include_groups=False
-        )
+        agg = mobility_df.groupby(lad_column).apply(weighted_mean, include_groups=False)
 
     # Add count of LSOAs per LAD
     lsoa_counts = mobility_df.groupby(lad_column).size()

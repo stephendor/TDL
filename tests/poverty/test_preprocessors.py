@@ -48,12 +48,14 @@ def sample_lsoa_gdf() -> gpd.GeoDataFrame:
             # Create 1km x 1km squares
             x_base = lad_idx * 10000 + lsoa_idx * 1000
             y_base = 180000
-            polygon = Polygon([
-                (x_base, y_base),
-                (x_base + 1000, y_base),
-                (x_base + 1000, y_base + 1000),
-                (x_base, y_base + 1000),
-            ])
+            polygon = Polygon(
+                [
+                    (x_base, y_base),
+                    (x_base + 1000, y_base),
+                    (x_base + 1000, y_base + 1000),
+                    (x_base, y_base + 1000),
+                ]
+            )
             polygons.append(polygon)
             lsoa_codes.append(f"{lad_code}{lsoa_idx:02d}")
             lad_codes.append(lad_code)
@@ -323,9 +325,7 @@ class TestInterpolateIdw:
 class TestInterpolateScipy:
     """Unit tests for interpolate_scipy()."""
 
-    def test_linear_interpolation(
-        self, simple_interpolation_points: gpd.GeoDataFrame
-    ):
+    def test_linear_interpolation(self, simple_interpolation_points: gpd.GeoDataFrame):
         """Test linear interpolation."""
         grid, metadata = interpolate_scipy(
             simple_interpolation_points, "value", grid_resolution=10, method="linear"
@@ -343,9 +343,7 @@ class TestInterpolateScipy:
         assert grid.shape == (10, 10)
         assert metadata["method"] == "cubic"
 
-    def test_nearest_interpolation(
-        self, simple_interpolation_points: gpd.GeoDataFrame
-    ):
+    def test_nearest_interpolation(self, simple_interpolation_points: gpd.GeoDataFrame):
         """Test nearest neighbor interpolation."""
         grid, metadata = interpolate_scipy(
             simple_interpolation_points, "value", grid_resolution=10, method="nearest"
@@ -388,9 +386,7 @@ class TestInterpolateToGrid:
     ):
         """Test that unknown method raises error."""
         with pytest.raises(ValueError, match="Unknown interpolation method"):
-            interpolate_to_grid(
-                simple_interpolation_points, "value", method="unknown"
-            )
+            interpolate_to_grid(simple_interpolation_points, "value", method="unknown")
 
 
 # ============================================================================
@@ -420,9 +416,7 @@ class TestInterpolateKriging:
 class TestInterpolateChunked:
     """Unit tests for interpolate_chunked()."""
 
-    def test_chunked_produces_result(
-        self, sample_centroids_gdf: gpd.GeoDataFrame
-    ):
+    def test_chunked_produces_result(self, sample_centroids_gdf: gpd.GeoDataFrame):
         """Test chunked interpolation produces valid result."""
         grid, metadata = interpolate_chunked(
             sample_centroids_gdf,
@@ -550,9 +544,7 @@ class TestPreprocessorsIntegration:
         assert len(lad) > 0
         assert len(lad) < 400  # Less than total England + Wales
 
-    def test_interpolation_on_real_centroids(
-        self, real_lsoa_subset: gpd.GeoDataFrame
-    ):
+    def test_interpolation_on_real_centroids(self, real_lsoa_subset: gpd.GeoDataFrame):
         """Test interpolation on real LSOA centroids."""
         from poverty_tda.data.census_shapes import get_lsoa_centroids
 
@@ -591,9 +583,7 @@ class TestPreprocessorsIntegration:
         # VTK file should be reasonably sized
         assert result.stat().st_size > 1000
 
-    def test_geographic_extent_covers_data(
-        self, real_lsoa_subset: gpd.GeoDataFrame
-    ):
+    def test_geographic_extent_covers_data(self, real_lsoa_subset: gpd.GeoDataFrame):
         """Test that output grid covers input data extent."""
         from poverty_tda.data.census_shapes import get_lsoa_centroids
 
@@ -661,8 +651,16 @@ class TestEdgeCases:
         )
         lsoa_27700 = gpd.GeoDataFrame(
             {"LSOA21CD": ["E01000001"]},
-            geometry=[Polygon([(530000, 180000), (531000, 180000),
-                              (531000, 181000), (530000, 181000)])],
+            geometry=[
+                Polygon(
+                    [
+                        (530000, 180000),
+                        (531000, 180000),
+                        (531000, 181000),
+                        (530000, 181000),
+                    ]
+                )
+            ],
             crs="EPSG:27700",
         )
 

@@ -8,16 +8,15 @@ to continuous mobility surfaces with VTK export.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import geopandas as gpd
 import numpy as np
 import pytest
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Polygon
 
 from poverty_tda.topology.mobility_surface import (
     CRS_BRITISH_NATIONAL_GRID,
-    DEFAULT_RESOLUTION,
     ENGLAND_WALES_BOUNDS,
     build_mobility_surface,
     create_mobility_grid,
@@ -25,7 +24,6 @@ from poverty_tda.topology.mobility_surface import (
     interpolate_chunked,
     interpolate_surface,
 )
-
 
 # ============================================================================
 # FIXTURES
@@ -48,10 +46,7 @@ def sample_lsoa_gdf() -> gpd.GeoDataFrame:
         for j in range(10):
             x = base_x + i * 1000
             y = base_y + j * 1000
-            poly = Polygon([
-                (x, y), (x + 1000, y),
-                (x + 1000, y + 1000), (x, y + 1000)
-            ])
+            poly = Polygon([(x, y), (x + 1000, y), (x + 1000, y + 1000), (x, y + 1000)])
             polygons.append(poly)
             codes.append(f"E01{i:02d}{j:03d}")
             names.append(f"Test LSOA {i:02d}{j:03d}")
@@ -485,7 +480,7 @@ class TestExportMobilityVtk:
         tmp_path: Path,
     ):
         """Test export to VTI (ImageData) format."""
-        pyvista = pytest.importorskip("pyvista", reason="pyvista not installed")
+        pytest.importorskip("pyvista", reason="pyvista not installed")
 
         grid_x, grid_y, surface = sample_surface_data
         output_path = tmp_path / "test_mobility.vti"
@@ -502,7 +497,7 @@ class TestExportMobilityVtk:
         tmp_path: Path,
     ):
         """Test export to VTS (StructuredGrid) format."""
-        pyvista = pytest.importorskip("pyvista", reason="pyvista not installed")
+        pytest.importorskip("pyvista", reason="pyvista not installed")
 
         grid_x, grid_y, surface = sample_surface_data
         output_path = tmp_path / "test_mobility.vts"
@@ -562,10 +557,7 @@ class TestExportMobilityVtk:
         grid_x, grid_y, surface = sample_surface_data
         output_path = tmp_path / "test.vti"
 
-        with patch(
-            "poverty_tda.topology.mobility_surface.HAS_PYVISTA",
-            False
-        ):
+        with patch("poverty_tda.topology.mobility_surface.HAS_PYVISTA", False):
             with pytest.raises(ImportError, match="pyvista is required"):
                 export_mobility_vtk(grid_x, grid_y, surface, output_path)
 
@@ -576,9 +568,7 @@ class TestExportMobilityVtk:
         surface = np.zeros((20, 20))  # Wrong shape
 
         with pytest.raises(ValueError, match="Shape mismatch"):
-            export_mobility_vtk(
-                grid_x, grid_y, surface, tmp_path / "test.vti"
-            )
+            export_mobility_vtk(grid_x, grid_y, surface, tmp_path / "test.vti")
 
 
 # ============================================================================
@@ -688,9 +678,7 @@ class TestSyntheticDataValidation:
         expected = grid_x + grid_y
 
         # Interpolate
-        surface = interpolate_surface(
-            centroids, z, grid_x, grid_y, method="linear"
-        )
+        surface = interpolate_surface(centroids, z, grid_x, grid_y, method="linear")
 
         # Check accuracy
         rmse = np.sqrt(np.mean((surface - expected) ** 2))
@@ -817,7 +805,10 @@ class TestMorseSmaleIntegration:
 
     def test_get_mobility_barriers(self, synthetic_lsoa_gdf: gpd.GeoDataFrame):
         """Test extracting mobility barriers."""
-        from poverty_tda.topology import analyze_mobility_topology, get_mobility_barriers
+        from poverty_tda.topology import (
+            analyze_mobility_topology,
+            get_mobility_barriers,
+        )
 
         _, _, ms_result = analyze_mobility_topology(
             synthetic_lsoa_gdf,

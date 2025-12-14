@@ -125,9 +125,7 @@ def create_labeled_windows(
         raise ValueError("labels index must match data index")
 
     if label_position not in {"last", "first", "middle"}:
-        raise ValueError(
-            "label_position must be 'last', 'first', or 'middle'"
-        )
+        raise ValueError("label_position must be 'last', 'first', or 'middle'")
 
     labeled_windows = []
     num_windows = (len(data) - window_size) // stride + 1

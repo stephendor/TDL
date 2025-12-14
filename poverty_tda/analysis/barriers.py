@@ -33,8 +33,7 @@ from typing import Any
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from numpy.typing import NDArray
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 
 from poverty_tda.topology.morse_smale import (
     CriticalPoint,
@@ -379,9 +378,7 @@ def map_barriers_to_geography(
         buffered = barrier.geometry.buffer(buffer_meters)
 
         # Find intersecting LSOAs
-        intersecting = lsoa_boundaries[
-            lsoa_boundaries.geometry.intersects(buffered)
-        ]
+        intersecting = lsoa_boundaries[lsoa_boundaries.geometry.intersects(buffered)]
 
         # Extract LSOA codes
         barrier.lsoa_codes = intersecting["lsoa_code"].tolist()
@@ -435,9 +432,7 @@ def rank_barriers(
         rank_by = "persistence"
 
     # Sort barriers
-    sorted_barriers = sorted(
-        barriers, key=ranking_keys[rank_by], reverse=True
-    )
+    sorted_barriers = sorted(barriers, key=ranking_keys[rank_by], reverse=True)
 
     return sorted_barriers[:top_n]
 

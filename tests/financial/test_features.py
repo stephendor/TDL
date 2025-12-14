@@ -488,7 +488,9 @@ class TestLandscapeStability:
         # Small perturbation (ε = 0.01)
         epsilon = 0.01
         point_cloud_perturbed = point_cloud + np.random.randn(50, 4) * epsilon
-        diagram2 = compute_persistence_vr(point_cloud_perturbed, homology_dimensions=(1,))
+        diagram2 = compute_persistence_vr(
+            point_cloud_perturbed, homology_dimensions=(1,)
+        )
         features2 = extract_landscape_features(diagram2)
 
         # Check that feature changes are bounded
@@ -606,9 +608,7 @@ class TestPersistenceImage:
         resolution_100 = (100, 100)
 
         image_20 = compute_persistence_image(sample_diagram, resolution=resolution_20)
-        image_100 = compute_persistence_image(
-            sample_diagram, resolution=resolution_100
-        )
+        image_100 = compute_persistence_image(sample_diagram, resolution=resolution_100)
 
         assert image_20.shape[1] == 20 * 20
         assert image_100.shape[1] == 100 * 100
@@ -808,7 +808,9 @@ class TestImageStability:
         # Small perturbation
         epsilon = 0.01
         point_cloud_perturbed = point_cloud + np.random.randn(50, 4) * epsilon
-        diagram2 = compute_persistence_vr(point_cloud_perturbed, homology_dimensions=(1,))
+        diagram2 = compute_persistence_vr(
+            point_cloud_perturbed, homology_dimensions=(1,)
+        )
         image2 = compute_persistence_image(diagram2, resolution=(50, 50))
         features2 = extract_image_features(image2)
 
@@ -843,7 +845,7 @@ class TestImageVsLandscapeComparison:
         diagram = compute_persistence_vr(point_cloud, homology_dimensions=(1,))
 
         # Compute both representations
-        landscape = compute_persistence_landscape(diagram, n_layers=5, n_bins=100)
+        _ = compute_persistence_landscape(diagram, n_layers=5, n_bins=100)
         image = compute_persistence_image(diagram, resolution=(50, 50))
 
         # Extract features
@@ -1283,4 +1285,3 @@ class TestAmplitudeMathematicalProperties:
         assert amp_double > 0
         assert np.isfinite(amp_single)
         assert np.isfinite(amp_double)
-

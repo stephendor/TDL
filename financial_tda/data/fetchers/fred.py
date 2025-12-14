@@ -120,17 +120,13 @@ def fetch_series(
                 return pd.Series(dtype=float)
 
             series.name = series_id
-            logger.info(
-                f"Fetched {len(series)} observations for {series_id}"
-            )
+            logger.info(f"Fetched {len(series)} observations for {series_id}")
             return series
 
         except ValueError as e:
             # Invalid series ID or API key - not retryable
             logger.error(f"Invalid series ID or API key: {series_id}")
-            raise ValueError(
-                f"Failed to fetch series {series_id}: {e}"
-            ) from e
+            raise ValueError(f"Failed to fetch series {series_id}: {e}") from e
 
         except Exception as e:
             # Network errors, rate limits - retryable
@@ -144,8 +140,7 @@ def fetch_series(
                 time.sleep(wait_time)
             else:
                 logger.error(
-                    f"Failed to fetch {series_id} "
-                    f"after {max_retries} attempts: {e}"
+                    f"Failed to fetch {series_id} after {max_retries} attempts: {e}"
                 )
                 raise
 
@@ -242,9 +237,7 @@ def fetch_multiple_series(
         df = df.fillna(method="bfill")
     # If None, leave NaN values as-is
 
-    logger.info(
-        f"Fetched {len(df)} observations across {len(df.columns)} series"
-    )
+    logger.info(f"Fetched {len(df)} observations across {len(df.columns)} series")
     return df
 
 
@@ -289,9 +282,7 @@ def fetch_macro_indicators(
         (500ms delay between series requests).
     """
     series_ids = list(MACRO_SERIES.keys())
-    logger.info(
-        f"Fetching {len(series_ids)} macro indicators from FRED"
-    )
+    logger.info(f"Fetching {len(series_ids)} macro indicators from FRED")
 
     return fetch_multiple_series(
         series_ids,

@@ -23,12 +23,14 @@ class TestReturnsCalculations:
         log_rets = returns.compute_log_returns(prices)
 
         # Expected: log(105/100), log(103/105), log(108/103)
-        expected = pd.Series([
-            np.nan,
-            np.log(105 / 100),
-            np.log(103 / 105),
-            np.log(108 / 103),
-        ])
+        expected = pd.Series(
+            [
+                np.nan,
+                np.log(105 / 100),
+                np.log(103 / 105),
+                np.log(108 / 103),
+            ]
+        )
 
         pd.testing.assert_series_equal(log_rets, expected, check_names=False)
 
@@ -181,9 +183,7 @@ class TestVolatilityCalculations:
 
     def test_realized_volatility_invalid_method(self):
         """Test that invalid method raises error."""
-        ohlc = pd.DataFrame(
-            {"Open": [100], "High": [105], "Low": [95], "Close": [102]}
-        )
+        ohlc = pd.DataFrame({"Open": [100], "High": [105], "Low": [95], "Close": [102]})
 
         with pytest.raises(ValueError, match="Unknown method"):
             returns.compute_realized_volatility(ohlc, window=1, method="invalid")

@@ -14,7 +14,6 @@ from financial_tda.analysis.windowed import (
     extract_windowed_features,
     sliding_window_generator,
 )
-from financial_tda.topology.filtration import compute_persistence_vr
 
 
 class TestSlidingWindowGenerator:
@@ -23,9 +22,7 @@ class TestSlidingWindowGenerator:
     def test_basic_window_generation(self):
         """Test basic window generation with no remainder."""
         data = np.arange(100)
-        windows = list(
-            sliding_window_generator(data, window_size=20, stride=20)
-        )
+        windows = list(sliding_window_generator(data, window_size=20, stride=20))
 
         # Should have 5 non-overlapping windows
         assert len(windows) == 5
@@ -40,9 +37,7 @@ class TestSlidingWindowGenerator:
     def test_overlapping_windows(self):
         """Test window generation with overlap (stride < window_size)."""
         data = np.arange(50)
-        windows = list(
-            sliding_window_generator(data, window_size=20, stride=10)
-        )
+        windows = list(sliding_window_generator(data, window_size=20, stride=10))
 
         # Check overlap
         assert windows[0][2][-1] == 19  # Last element of first window
@@ -52,9 +47,7 @@ class TestSlidingWindowGenerator:
     def test_short_data_single_window(self):
         """Test that short data yields single window."""
         data = np.arange(15)
-        windows = list(
-            sliding_window_generator(data, window_size=20, stride=5)
-        )
+        windows = list(sliding_window_generator(data, window_size=20, stride=5))
 
         # Should yield single window with all data
         assert len(windows) == 1
@@ -66,18 +59,14 @@ class TestSlidingWindowGenerator:
     def test_empty_data(self):
         """Test empty data handling."""
         data = np.array([])
-        windows = list(
-            sliding_window_generator(data, window_size=10, stride=5)
-        )
+        windows = list(sliding_window_generator(data, window_size=10, stride=5))
 
         assert len(windows) == 0
 
     def test_final_partial_window(self):
         """Test that final partial window is included if substantial."""
         data = np.arange(55)  # 55 points
-        windows = list(
-            sliding_window_generator(data, window_size=20, stride=20)
-        )
+        windows = list(sliding_window_generator(data, window_size=20, stride=20))
 
         # Should have 3 full windows (0-20, 20-40, 40-60 would exceed)
         # Plus partial window 40-55 (15 points, >= 50% of window_size)
@@ -388,10 +377,12 @@ class TestDetectTopologyChanges:
     def test_iqr_method(self):
         """Test IQR-based outlier detection."""
         # Create data with outliers
-        distances = np.concatenate([
-            np.random.randn(20) * 0.1 + 0.5,  # Normal values
-            [2.0, 2.5]  # Outliers
-        ])
+        distances = np.concatenate(
+            [
+                np.random.randn(20) * 0.1 + 0.5,  # Normal values
+                [2.0, 2.5],  # Outliers
+            ]
+        )
 
         changes = detect_topology_changes(distances, method="iqr")
 

@@ -114,8 +114,7 @@ def fetch_ticker(
                 time.sleep(wait_time)
             else:
                 logger.error(
-                    f"Rate limit exceeded for {ticker} "
-                    f"after {max_retries} attempts"
+                    f"Rate limit exceeded for {ticker} after {max_retries} attempts"
                 )
                 raise
 
@@ -270,8 +269,7 @@ def fetch_index(
     if index_name_lower not in INDEX_SYMBOLS:
         supported = ", ".join(INDEX_SYMBOLS.keys())
         raise ValueError(
-            f"Unsupported index name: '{index_name}'. "
-            f"Supported indices: {supported}"
+            f"Unsupported index name: '{index_name}'. Supported indices: {supported}"
         )
 
     symbol = INDEX_SYMBOLS[index_name_lower]

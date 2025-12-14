@@ -236,9 +236,7 @@ def get_education_from_imd(
 
     available_cols = [c for c in optional_cols if c in imd_df.columns]
     if not available_cols:
-        raise ValueError(
-            f"IMD DataFrame must contain at least one of: {optional_cols}"
-        )
+        raise ValueError(f"IMD DataFrame must contain at least one of: {optional_cols}")
 
     result = imd_df[required_cols + available_cols].copy()
 

@@ -130,8 +130,8 @@ class TestFetchOHLC:
         """Test error handling for invalid coin ID (HTTP 404)."""
         mock_response = MagicMock()
         mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = (
-            requests.exceptions.HTTPError(response=mock_response)
+        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+            response=mock_response
         )
         mock_get.return_value = mock_response
 
@@ -219,9 +219,7 @@ class TestFetchHistoricalRange:
         mock_get.return_value = mock_response
 
         # Execute
-        result = fetch_historical_range(
-            "bitcoin", "usd", "2021-01-01", "2021-01-31"
-        )
+        result = fetch_historical_range("bitcoin", "usd", "2021-01-01", "2021-01-31")
 
         # Validate
         assert not result.empty
@@ -231,9 +229,7 @@ class TestFetchHistoricalRange:
     def test_fetch_historical_range_invalid_date(self):
         """Test error handling for invalid date format."""
         with pytest.raises(ValueError, match="Invalid date format"):
-            fetch_historical_range(
-                "bitcoin", "usd", "2021/01/01", "2021-01-31"
-            )
+            fetch_historical_range("bitcoin", "usd", "2021/01/01", "2021-01-31")
 
 
 class TestFetchMultipleCoins:
@@ -269,9 +265,7 @@ class TestFetchMultipleCoins:
 
     @patch("financial_tda.data.fetchers.crypto.fetch_ohlc")
     @patch("financial_tda.data.fetchers.crypto.time.sleep")
-    def test_fetch_multiple_partial_failure(
-        self, mock_sleep, mock_fetch_ohlc
-    ):
+    def test_fetch_multiple_partial_failure(self, mock_sleep, mock_fetch_ohlc):
         """Test that partial failures don't prevent other coins."""
         btc_data = pd.DataFrame(
             {"Open": [29000], "High": [30000], "Low": [28500], "Close": [29500]},
@@ -303,9 +297,7 @@ class TestFetchMultipleCoins:
         )
 
         # Execute with use_ohlc=False
-        result = fetch_multiple_coins(
-            ["bitcoin"], days=7, use_ohlc=False
-        )
+        result = fetch_multiple_coins(["bitcoin"], days=7, use_ohlc=False)
 
         # Validate market chart was used
         assert mock_fetch_chart.called
@@ -354,9 +346,7 @@ class TestCryptoIntegration:
         Bitcoin dropped from ~$47k (Jan 2022) to ~$16k (Nov 2022).
         Validates major drawdown period.
         """
-        btc = fetch_historical_range(
-            "bitcoin", "usd", "2022-01-01", "2022-12-31"
-        )
+        btc = fetch_historical_range("bitcoin", "usd", "2022-01-01", "2022-12-31")
 
         assert not btc.empty
         assert len(btc) > 300  # Full year of data
@@ -375,9 +365,7 @@ class TestCryptoIntegration:
 
         # Validate drawdown magnitude
         drawdown = (nov_low - jan_high) / jan_high
-        assert (
-            drawdown < -0.50
-        ), f"Expected >50% drawdown, got {drawdown * 100:.1f}%"
+        assert drawdown < -0.50, f"Expected >50% drawdown, got {drawdown * 100:.1f}%"
 
     def test_crypto_winter_2022_ethereum(self):
         """
@@ -385,9 +373,7 @@ class TestCryptoIntegration:
 
         Ethereum dropped from ~$3.8k (Jan 2022) to ~$1.2k (Nov 2022).
         """
-        eth = fetch_historical_range(
-            "ethereum", "usd", "2022-01-01", "2022-12-31"
-        )
+        eth = fetch_historical_range("ethereum", "usd", "2022-01-01", "2022-12-31")
 
         assert not eth.empty
 
@@ -407,9 +393,7 @@ class TestCryptoIntegration:
 
         Bitcoin and Ethereum both saw sharp declines during this period.
         """
-        btc = fetch_historical_range(
-            "bitcoin", "usd", "2022-05-01", "2022-05-31"
-        )
+        btc = fetch_historical_range("bitcoin", "usd", "2022-05-01", "2022-05-31")
 
         assert not btc.empty
 

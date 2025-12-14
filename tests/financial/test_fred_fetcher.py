@@ -136,9 +136,7 @@ class TestFetchSeries:
         mock_get_client.return_value = mock_client
 
         # Execute
-        result = fetch_series(
-            "VIXCLS", "2020-01-01", "2020-01-02", base_delay=1
-        )
+        result = fetch_series("VIXCLS", "2020-01-01", "2020-01-02", base_delay=1)
 
         # Validate retry logic
         assert mock_client.get_series.call_count == 3
@@ -175,9 +173,7 @@ class TestFetchMultipleSeries:
         mock_get_client.return_value = MagicMock()
 
         # Execute
-        result = fetch_multiple_series(
-            ["VIXCLS", "UNRATE"], "2020-01-01", "2020-01-04"
-        )
+        result = fetch_multiple_series(["VIXCLS", "UNRATE"], "2020-01-01", "2020-01-04")
 
         # Validate
         assert len(result) == 3  # Should align to daily index
@@ -210,26 +206,18 @@ class TestFetchMultipleSeries:
 
     @patch("financial_tda.data.fetchers.fred.fetch_series")
     @patch("financial_tda.data.fetchers.fred.get_fred_client")
-    def test_fetch_multiple_partial_failure(
-        self, mock_get_client, mock_fetch_series
-    ):
+    def test_fetch_multiple_partial_failure(self, mock_get_client, mock_fetch_series):
         """Test that partial failures don't prevent other series."""
         # First series succeeds, second fails, third succeeds
         mock_fetch_series.side_effect = [
-            pd.Series(
-                [1.0], index=pd.DatetimeIndex(["2020-01-01"]), name="S1"
-            ),
+            pd.Series([1.0], index=pd.DatetimeIndex(["2020-01-01"]), name="S1"),
             Exception("Failed to fetch"),
-            pd.Series(
-                [3.0], index=pd.DatetimeIndex(["2020-01-01"]), name="S3"
-            ),
+            pd.Series([3.0], index=pd.DatetimeIndex(["2020-01-01"]), name="S3"),
         ]
         mock_get_client.return_value = MagicMock()
 
         # Execute
-        result = fetch_multiple_series(
-            ["S1", "S2", "S3"], "2020-01-01", "2020-01-04"
-        )
+        result = fetch_multiple_series(["S1", "S2", "S3"], "2020-01-01", "2020-01-04")
 
         # Should have S1 and S3, but not S2
         assert "S1" in result.columns
@@ -238,9 +226,7 @@ class TestFetchMultipleSeries:
 
     @patch("financial_tda.data.fetchers.fred.fetch_series")
     @patch("financial_tda.data.fetchers.fred.get_fred_client")
-    def test_fetch_multiple_no_fill(
-        self, mock_get_client, mock_fetch_series
-    ):
+    def test_fetch_multiple_no_fill(self, mock_get_client, mock_fetch_series):
         """Test alignment with no forward-fill."""
         vix_data = pd.Series(
             [15.5, 16.2],
@@ -334,9 +320,7 @@ class TestFredIntegration:
 
         # Spread should show negative values (inversion)
         min_spread = spread.min()
-        assert (
-            min_spread < 0
-        ), f"Expected negative spread inversion, got {min_spread}"
+        assert min_spread < 0, f"Expected negative spread inversion, got {min_spread}"
 
     def test_fetch_fed_funds_2020_covid(self):
         """
@@ -373,9 +357,7 @@ class TestFredIntegration:
 
         # Daily series should have more observations than monthly
         vix_obs = df["VIXCLS"].notna().sum()
-        unrate_obs = (
-            df["UNRATE"].diff().notna().sum()
-        )  # Count unique values
+        unrate_obs = df["UNRATE"].diff().notna().sum()  # Count unique values
         assert vix_obs > unrate_obs
 
     def test_fetch_all_macro_indicators(self):

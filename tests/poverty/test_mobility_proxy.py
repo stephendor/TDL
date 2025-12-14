@@ -181,9 +181,7 @@ class TestComputeEducationalUpward:
         self, sample_imd_df: pd.DataFrame, sample_polar4_df: pd.DataFrame
     ):
         """Test educational upward with POLAR4 data."""
-        result = compute_educational_upward(
-            sample_imd_df, polar_df=sample_polar4_df
-        )
+        result = compute_educational_upward(sample_imd_df, polar_df=sample_polar4_df)
 
         assert len(result) == len(sample_imd_df)
         assert result.min() >= 0
@@ -230,9 +228,7 @@ class TestComputeMobilityProxy:
 
     def test_custom_weights(self, sample_imd_df: pd.DataFrame):
         """Test mobility proxy with custom weights."""
-        result = compute_mobility_proxy(
-            sample_imd_df, alpha=0.5, beta=0.25, gamma=0.25
-        )
+        result = compute_mobility_proxy(sample_imd_df, alpha=0.5, beta=0.25, gamma=0.25)
 
         assert len(result) == len(sample_imd_df)
         # Proxy values should be in reasonable range
@@ -371,11 +367,13 @@ class TestValidateAgainstSmc:
             {
                 "lsoa_code": [f"E0100{i:04d}" for i in range(n_lsoas)],
                 "lad_name": lad_names,
-                "mobility_proxy": np.concatenate([
-                    np.random.uniform(0.7, 0.9, 40),  # Top LADs: high mobility
-                    np.random.uniform(0.1, 0.3, 40),  # Bottom LADs: low mobility
-                    np.random.uniform(0.4, 0.6, 120),  # Others: medium
-                ]),
+                "mobility_proxy": np.concatenate(
+                    [
+                        np.random.uniform(0.7, 0.9, 40),  # Top LADs: high mobility
+                        np.random.uniform(0.1, 0.3, 40),  # Bottom LADs: low mobility
+                        np.random.uniform(0.4, 0.6, 120),  # Others: medium
+                    ]
+                ),
             }
         )
 
@@ -468,9 +466,7 @@ class TestMobilityProxyIntegration:
 
         # Validation should pass (patterns match expected)
         # Note: This may fail if weights need adjustment
-        assert result["validation_passed"], (
-            f"SMC validation failed. Details: {result}"
-        )
+        assert result["validation_passed"], f"SMC validation failed. Details: {result}"
 
     @pytest.mark.validation
     def test_industrial_north_pattern(self, real_imd_df: pd.DataFrame):
@@ -481,9 +477,7 @@ class TestMobilityProxyIntegration:
         lad_values = lad_mobility.set_index("lad_name")["mobility_proxy"]
 
         north_values = [
-            lad_values[lad]
-            for lad in INDUSTRIAL_NORTH_LADS
-            if lad in lad_values.index
+            lad_values[lad] for lad in INDUSTRIAL_NORTH_LADS if lad in lad_values.index
         ]
 
         assert len(north_values) > 0, "No industrial North LADs found"
@@ -581,9 +575,5 @@ class TestEdgeCases:
         result3 = compute_mobility_proxy(df, alpha=0.0, beta=0.0, gamma=1.0)
 
         # Results should differ because components use different rank patterns
-        assert not np.allclose(
-            result1["mobility_proxy"], result2["mobility_proxy"]
-        )
-        assert not np.allclose(
-            result2["mobility_proxy"], result3["mobility_proxy"]
-        )
+        assert not np.allclose(result1["mobility_proxy"], result2["mobility_proxy"])
+        assert not np.allclose(result2["mobility_proxy"], result3["mobility_proxy"])
