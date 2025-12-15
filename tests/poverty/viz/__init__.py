@@ -1,1 +1,0 @@
-# Poverty viz tests
