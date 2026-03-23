@@ -114,13 +114,17 @@ def _make_synthetic_data(
     return emb, trajs, embed_kwargs
 
 
-def _load_checkpoint_data(
+def _load_trajectory_data(
     data_dir: Path,
 ) -> tuple[np.ndarray, list[list[str]], dict]:
-    """Load embeddings and trajectories from existing pipeline checkpoint."""
+    """Load raw trajectories from data_dir and compute ngram embeddings.
+
+    Note: embeddings are recomputed here (pca_dim=5). If you need to reuse
+    embeddings from a prior pipeline run, load the saved checkpoint directly
+    and pass embeddings/embed_kwargs to run_wasserstein_nulls.
+    """
     from trajectory_tda.embedding.ngram_embed import ngram_embed
 
-    # Load raw trajectories
     traj_path = data_dir / "bhps_trajectories.json"
     if not traj_path.exists():
         raise FileNotFoundError(f"Trajectory file not found: {traj_path}")
@@ -130,7 +134,6 @@ def _load_checkpoint_data(
 
     trajectories = [item["trajectory"] for item in traj_data]
 
-    # Load or recompute embeddings
     embed_kwargs = {"pca_dim": 5}
     emb, _ = ngram_embed(trajectories, **embed_kwargs)
 
@@ -198,7 +201,12 @@ def main():
     parser.add_argument("--synthetic", action="store_true", help="Use synthetic data for validation")
     parser.add_argument("--results-dir", type=str, default="results/trajectory_tda_integration")
     parser.add_argument("--data-dir", type=str, default="trajectory_tda/data")
-    parser.add_argument("--output-dir", type=str, default=None, help="Output directory (default: results-dir)")
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Output directory (default: results-dir)",
+    )
     parser.add_argument("--n-perms", type=int, default=200)
     parser.add_argument("--landmarks", type=int, default=2500)
     parser.add_argument("--max-dim", type=int, default=1)
@@ -221,7 +229,7 @@ def main():
         emb, trajs, embed_kwargs = _make_synthetic_data()
     else:
         logger.info(f"Loading data from {args.data_dir}")
-        emb, trajs, embed_kwargs = _load_checkpoint_data(
+        emb, trajs, embed_kwargs = _load_trajectory_data(
             Path(args.data_dir),
         )
 

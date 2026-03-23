@@ -3,7 +3,7 @@ name = "tdl"
 version = "0.1.0"
 description = "Topological Data Analysis for Financial Market Regime Detection and UK Poverty Trap Analysis"
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.12"
 authors = [
     { name = "TDL Project" }
 ]
@@ -46,6 +46,9 @@ mapper = [
     "kmapper>=2.0.0",
 ]
 wasserstein = [
+    # Python Optimal Transport: planned as an alternative exact OT backend to
+    # gudhi.wasserstein in trajectory_tda/topology/vectorisation.py.
+    # Tracked in wasserstein_distance(); see TODO comment there.
     "pot>=0.9.0",
 ]
 

@@ -233,6 +233,12 @@ def wasserstein_distance(
     except (ImportError, AttributeError):
         pass
 
+    # TODO: Use POT (Python Optimal Transport) as an alternative exact backend.
+    # Install via: pip install "tdl[wasserstein]"
+    # Intended usage: ot.emd2 on augmented diagrams (points + diagonal projections),
+    # matching each point in dgm1 to either a point in dgm2 or its own diagonal
+    # projection. This will replace the greedy fallback below once validated.
+
     # Fallback: greedy matching by persistence
     # Sort by persistence descending
     idx1 = np.argsort(-pers1)

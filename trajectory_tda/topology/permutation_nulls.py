@@ -16,6 +16,8 @@ from __future__ import annotations
 import logging
 from typing import Literal
 
+from numpy.typing import NDArray
+
 import numpy as np
 from joblib import Parallel, delayed
 
@@ -26,7 +28,9 @@ from poverty_tda.topology.multidim_ph import (
 )
 from trajectory_tda.embedding.ngram_embed import STATES, ngram_embed
 from trajectory_tda.topology.trajectory_ph import maxmin_landmarks
-from trajectory_tda.topology.vectorisation import wasserstein_distance as compute_wasserstein
+from trajectory_tda.topology.vectorisation import (
+    wasserstein_distance as compute_wasserstein,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -295,8 +299,7 @@ def _stratified_markov_shuffle(
 
         if n_regime < min_regime_n:
             logger.warning(
-                "Regime %s: only %d trajectories (< %d), "
-                "using global transition matrix",
+                "Regime %s: only %d trajectories (< %d), " "using global transition matrix",
                 k,
                 n_regime,
                 min_regime_n,
@@ -472,8 +475,8 @@ def _single_permutation(
     statistic: str,
     markov_order: int,
     embed_kwargs: dict | None,
-    ph_observed: PHResult | None = None,
-) -> dict:
+    obs_diagrams: dict[int, NDArray[np.float64]] | None = None,
+) -> dict[str, float | NDArray[np.float64]]:
     """Execute one permutation and return statistic values."""
     rng = np.random.RandomState(seed)
 
@@ -510,18 +513,19 @@ def _single_permutation(
     ph = compute_rips_ph(landmarks, max_dim=max_dim)
 
     # Wasserstein statistic: return W(null, observed) per dimension
-    if statistic == "wasserstein" and ph_observed is not None:
-        result = {}
+    if statistic == "wasserstein" and obs_diagrams is not None:
+        ph_obs_stub = PHResult(dgms=obs_diagrams)
+        result: dict[str, float | NDArray[np.float64]] = {}
         for dim in range(max_dim + 1):
             key = f"H{dim}"
-            result[key] = compute_wasserstein(ph, ph_observed, dim=dim)
+            result[key] = compute_wasserstein(ph, ph_obs_stub, dim=dim)
             # Store raw diagram for null-null baseline computation
             feats = ph.h_features(dim)
             arr = np.array(feats) if len(feats) > 0 else np.empty((0, 2))
             # Filter infinite features
             if len(arr) > 0:
                 arr = arr[np.isfinite(arr[:, 1])]
-            result[f"{key}_dgm"] = arr.tolist()
+            result[f"{key}_dgm"] = arr
         return result
 
     summary = persistence_summary(ph)
@@ -603,8 +607,18 @@ def permutation_test_trajectories(
             key = f"H{dim}"
             observed[key] = obs_summary.get(key, {}).get(statistic, 0.0)
         logger.info(f"  Observed {statistic}: {observed}")
+        obs_diagrams: dict[int, NDArray[np.float64]] | None = None
     else:
         logger.info("  Wasserstein mode: computing W(null, observed) for each permutation")
+        # Pre-extract finite diagrams per dimension so workers only receive
+        # lightweight arrays rather than the full PHResult object.
+        obs_diagrams = {}
+        for dim in range(max_dim + 1):
+            feats = ph_obs.h_features(dim)
+            arr = np.array(feats) if len(feats) > 0 else np.empty((0, 2), dtype=np.float64)
+            if len(arr) > 0:
+                arr = arr[np.isfinite(arr[:, 1])]
+            obs_diagrams[dim] = arr
 
     # Run permutations in parallel
     seeds = [seed + i + 1 for i in range(n_permutations)]
@@ -621,7 +635,7 @@ def permutation_test_trajectories(
             statistic,
             markov_order,
             embed_kwargs,
-            ph_observed=ph_obs if statistic == "wasserstein" else None,
+            obs_diagrams=obs_diagrams,
         )
         for s in seeds
     )

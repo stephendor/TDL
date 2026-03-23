@@ -5,7 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tests.trajectory.conftest import make_cyclic_trajectories, make_synthetic_trajectories
+from tests.trajectory.conftest import (
+    make_cyclic_trajectories,
+    make_synthetic_trajectories,
+)
 from trajectory_tda.embedding.ngram_embed import ngram_embed
 from trajectory_tda.topology.permutation_nulls import (
     _label_shuffle,
@@ -150,7 +153,6 @@ class TestWassersteinStatistic:
     def test_single_permutation_wasserstein_returns_distances(self):
         """_single_permutation with wasserstein should return W distances per dim."""
         from poverty_tda.topology.multidim_ph import compute_rips_ph
-
         from trajectory_tda.topology.trajectory_ph import maxmin_landmarks
 
         trajs = make_synthetic_trajectories(n=30, t=10)
@@ -263,12 +265,12 @@ class TestWassersteinStatistic:
         assert "H0" in result
         assert result["statistic"] == "wasserstein"
 
-    def test_wasserstein_cyclic_vs_random_separation(self):
-        """W distances are non-negative for both cyclic and random trajectories.
+    def test_wasserstein_cyclic_and_random_validity(self):
+        """Validate that W distances are computed for both cyclic and random trajectories.
 
         Checks basic validity only: both structured (cyclic) and unstructured
         (random) data produce valid non-negative Wasserstein distances.
-        A strict cyclic > random separation assertion is omitted because
+        No strict cyclic > random separation assertion is enforced because
         n_permutations=10 is too small for reliable signal separation.
         """
         # Cyclic data — has genuine topological signal
